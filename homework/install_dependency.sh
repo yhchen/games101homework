@@ -1,18 +1,22 @@
 #!/bin/bash
 
+FILE_PATH=_build
+
 cd `dirname $0`
 cd ./eigen
 
 echo "Installing dependencies..."
-apt-get install cmake
-apt-get install g++
+sudo apt-get install cmake
+sudo apt-get install g++
 
 echo "Building..."
-mkdir -p build/
-cd build/
+mkdir -p ${FILE_PATH}/
+cd ${FILE_PATH}/
 cmake ..
 make
-make install
+sudo make install
 cd ../..
 
 echo "Done!"
+
+
