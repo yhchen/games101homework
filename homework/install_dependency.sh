@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cd `dirname $0`
+cd ./eigen
 
 echo "Installing dependencies..."
 apt-get install cmake
@@ -12,6 +13,6 @@ cd build/
 cmake ..
 make
 make install
-cd ..
+cd ../..
 
 echo "Done!"
