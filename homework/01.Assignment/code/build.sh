@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILE_PATH=./code/_build
+FILE_PATH=./_build
 
 if [ -d ${FILE_PATH} ]; then
 	rm -rf ${FILE_PATH}
