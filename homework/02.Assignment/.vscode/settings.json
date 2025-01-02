@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.inc": "cpp",
+        "eigen": "cpp",
+        "random": "cpp"
+    },
+    "C_Cpp.clang_format_fallbackStyle": "Microsoft"
+}
