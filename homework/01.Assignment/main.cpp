@@ -5,15 +5,14 @@
 #include <opencv2/opencv.hpp>
 
 constexpr double MY_PI = 3.1415926;
-#define DEG2RAD(_DEG) (_DEG * MY_PI / 180)
+#define DEG2RAD(_DEG) ((_DEG) / 180 * MY_PI)
 
 Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
 {
     Eigen::Matrix4f view = Eigen::Matrix4f::Identity();
 
     Eigen::Matrix4f translate;
-    translate << 1, 0, 0, -eye_pos[0], 0, 1, 0, -eye_pos[1], 0, 0, 1,
-        -eye_pos[2], 0, 0, 0, 1;
+    translate << 1, 0, 0, -eye_pos[0], 0, 1, 0, -eye_pos[1], 0, 0, 1, -eye_pos[2], 0, 0, 0, 1;
 
     view = translate * view;
 
@@ -28,28 +27,61 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle)
     // Create the model matrix for rotating the triangle around the Z axis.
     // Then return it.
 
-    // double rad = DEG2RAD(rotation_angle);
-    // auto c = cos(rad);
-    // auto s = sin(rad);
-    // model << c, -s, 0, 0, // 0
-    //     s, c, 0, 0,       // 1
-    //     0, 0, 1, 0,       // 2
-    //     0, 0, 0, 1;       // 3
+    double rad = DEG2RAD(rotation_angle);
+    auto c = cos(rad);
+    auto s = sin(rad);
+    model << c, -s, 0, 0, // x
+        s, c, 0, 0,       // y
+        0, 0, 1, 0,       // z
+        0, 0, 0, 1;       // w
 
     return model;
 }
 
-Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
-                                      float zNear, float zFar)
+Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float zNear, float zFar)
 {
     // Students will implement this function
 
     Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
 
+    float eyeAngle = DEG2RAD(eye_fov / 2);
+    float top = zNear * std::tan(eyeAngle);
+    float bottom = -top;
+    float right = top * aspect_ratio;
+    float left = -right;
+
     // TODO: Implement this function
     // Create the projection matrix for the given parameters.
     // Then return it.
+    Eigen::Matrix4f moveMat = Eigen::Matrix4f::Identity();
+    moveMat << 1, 0, 0, -(right + left) / 2, // x
+        0, 1, 0, -(top + bottom) / 2,        // y
+        0, 0, 1, -(zNear + zFar) / 2,        // z
+        0, 0, 0, 1;                          // w
 
+    Eigen::Matrix4f scaleMat(4, 4);
+    scaleMat << 2 / (right - left), 0, 0, 0, // x
+        0, 2 / (top - bottom), 0, 0,         // y
+        0, 0, 2 / (zNear - zFar), 0,         // z
+        0, 0, 0, 1;                          // w
+
+    Eigen::Matrix4f persp2OrthoMat(4, 4);
+    persp2OrthoMat << zNear, 0, 0, 0,      // x
+        0, zNear, 0, 0,                    // y
+        0, 0, zNear + zFar, -zNear * zFar, // z
+        0, 0, 1, 0;                        // w
+
+    // 为了使得三角形是正着显示的，这里需要把透视矩阵乘以下面这样的矩阵
+    // 参考：http://games-cn.org/forums/topic/%e4%bd%9c%e4%b8%9a%e4%b8%89%e7%9a%84%e7%89%9b%e5%80%92%e8%bf%87%e6%9d%a5%e4%ba%86/
+    Eigen::Matrix4f Mt(4, 4);
+    Mt << 1, 0, 0, 0, // x
+        0, 1, 0, 0,   // y
+        0, 0, -1, 0,  // z
+        0, 0, 0, 1;   // w
+
+    persp2OrthoMat = persp2OrthoMat * Mt;
+
+    projection = scaleMat * moveMat * persp2OrthoMat * projection;
     return projection;
 }
 
