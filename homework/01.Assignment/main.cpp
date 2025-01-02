@@ -81,7 +81,13 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float z
 
     persp2OrthoMat = persp2OrthoMat * Mt;
 
-    projection = scaleMat * moveMat * persp2OrthoMat * projection;
+    // projection = scaleMat * moveMat * persp2OrthoMat * projection;
+    // 移动矩阵右乘缩放矩阵
+    Eigen::Matrix4f m = moveMat * scaleMat;
+    // 移动缩放矩阵右乘正交转投影矩阵
+    m = m * persp2OrthoMat;
+    // 最终右乘 projection矩阵（投影矩阵），由于此处的projection矩阵为单位矩阵所以可以忽略该步骤
+    projection = m * projection;
     return projection;
 }
 
