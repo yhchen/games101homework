@@ -50,6 +50,10 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float z
     float right = top * aspect_ratio;
     float left = -right;
 
+    // 由于是站在原点向-z轴方向看，所以zNear和zFar应该为负数才能得到正确答案
+    zNear = -zNear;
+    zFar = -zFar;
+
     // TODO: Implement this function
     // Create the projection matrix for the given parameters.
     // Then return it.
@@ -71,17 +75,19 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio, float z
         0, 0, zNear + zFar, -zNear * zFar, // z
         0, 0, 1, 0;                        // w
 
+    // 已删除，改用 line: 53 - 55 行
     // 为了使得三角形是正着显示的，这里需要把透视矩阵乘以下面这样的矩阵
     // 参考：http://games-cn.org/forums/topic/%e4%bd%9c%e4%b8%9a%e4%b8%89%e7%9a%84%e7%89%9b%e5%80%92%e8%bf%87%e6%9d%a5%e4%ba%86/
-    Eigen::Matrix4f Mt(4, 4);
-    Mt << 1, 0, 0, 0, // x
-        0, 1, 0, 0,   // y
-        0, 0, -1, 0,  // z
-        0, 0, 0, 1;   // w
+    // Eigen::Matrix4f Mt(4, 4);
+    // Mt << 1, 0, 0, 0, // x
+    //     0, 1, 0, 0,   // y
+    //     0, 0, -1, 0,  // z
+    //     0, 0, 0, 1;   // w
+    // persp2OrthoMat = persp2OrthoMat * Mt;
 
-    persp2OrthoMat = persp2OrthoMat * Mt;
-
+    // 投影矩阵连贯写法，下面是拆解计算写法
     // projection = scaleMat * moveMat * persp2OrthoMat * projection;
+
     // 移动矩阵右乘缩放矩阵
     Eigen::Matrix4f m = moveMat * scaleMat;
     // 移动缩放矩阵右乘正交转投影矩阵
